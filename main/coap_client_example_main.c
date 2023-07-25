@@ -22,6 +22,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
+#include "freertos/timers.h"
 
 #include "esp_log.h"
 #include "esp_wifi.h"
@@ -43,6 +44,7 @@
 #define DHT11_PIN 4
 #define NODE_ID 104
 #define DHT_PERIOD 3000
+#define TIME_PUMP 30000
 
 
 
@@ -129,6 +131,20 @@ static void configure_led(void)
     /* Set the GPIO as a push/pull output */
     gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
 }
+
+// SemaphoreHandle_t xSemaphore = xSemaphoreCreateBinary();
+// static void turnOff_Pump(void){
+//     for (; ; )
+//     {
+//         if( xSemaphore != NULL ) {
+//             if( xSemaphoreTake( xSemaphore, ( TickType_t ) portMAX_DELAY) == pdTRUE ) {
+//                 vTaskDelay(30000 / portTICK_PERIOD_MS);
+//                 gpio_set_level(BLINK_GPIO, 0);
+//             }
+//         }  
+//     }  
+// }
+
 
 
 static coap_response_t
