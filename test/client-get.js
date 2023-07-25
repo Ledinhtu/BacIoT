@@ -1,6 +1,6 @@
 const coap = require('coap') // or coap
 const HOST = 'localhost';
-const PORT = 5683;
+const PORT = 5684;
 
 
 // const req = coap.request({
