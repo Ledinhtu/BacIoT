@@ -1,0 +1,5 @@
+build/
+.vscode/
+managed_components/
+main/coap_client_example_main.txt
+main/pdu.txt
