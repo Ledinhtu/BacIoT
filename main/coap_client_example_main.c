@@ -45,6 +45,7 @@
 #define NODE_ID 104
 #define DHT_PERIOD 3000
 #define TIME_PUMP 30000
+#define NUM_TIMERS 5
 
 
 
@@ -85,6 +86,7 @@
 #define COAP_DEFAULT_DEMO_URI CONFIG_EXAMPLE_TARGET_DOMAIN_URI
 
 const static char *TAG = "CoAP_client";
+ TimerHandle_t xTimers;
 
 static int resp_wait = 1;
 static int resp_wait_observe = 1;
@@ -145,6 +147,10 @@ static void configure_led(void)
 //     }  
 // }
 
+static void turnOff_Pump(TimerHandle_t xTimer){
+    gpio_set_level(BLINK_GPIO, 0);
+    // xTimerStop( xTimer, 0 );
+}
 
 
 static coap_response_t
@@ -243,10 +249,36 @@ observe_message_handler(coap_session_t *session,
                 ESP_LOGE(TAG, "TRUE");
                 gpio_set_level(BLINK_GPIO, 1);
                 // printf("TRUE");
+                if( xTimers != NULL ) {
+                    if( xTimerStart( xTimers, 0 ) != pdPASS )
+                    {
+                        ESP_LOGE(TAG, "Timer start FAIL!");
+
+                    } else
+                    {
+                        ESP_LOGE(TAG, "Timer start SUCCESSED!");
+                    }
+                    
+                }
             }
             else if(!strcmp(status, "false")){
                 ESP_LOGE(TAG, "FALSE");
                 gpio_set_level(BLINK_GPIO, 0);
+
+                if( xTimerReset( xTimers, 0 ) != pdPASS )
+                {
+                    ESP_LOGE(TAG, "xTimerReset");
+                }
+                if( xTimers != NULL ) {
+                    if( xTimerStop( xTimers, 0 ) != pdPASS )
+                    {
+                        ESP_LOGE(TAG, "Timer stop FAIL");
+                    } else
+                    {
+                        ESP_LOGE(TAG, "Timer stop SUCCESSED!");
+                    }
+                    
+                }
                 // printf("FALSE");
             }
             else {
@@ -969,6 +1001,8 @@ void app_main(void)
     ESP_ERROR_CHECK(example_connect());
 
     configure_led();
+
+    xTimers = xTimerCreate("pump_timer", TIME_PUMP / portTICK_PERIOD_MS, pdFALSE, ( void * ) 0, turnOff_Pump);
 
     xTaskCreate(coap_client_observe, "coap_observe", 8 * 1024, NULL, 5, NULL);
 
